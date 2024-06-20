@@ -52,7 +52,21 @@ class Network(object):
         self-explanatory.  If ``test_data`` is provided then the
         network will be evaluated against the test data after each
         epoch, and partial progress printed out.  This is useful for
-        tracking progress, but slows things down substantially."""
+        tracking progress, but slows things down substantially.
+        
+        The steps are as follows:
+        1. Shuffle the training data for each epoch.
+        2. Partition the training data into mini-batches of the appropriate size.
+        3. For each mini-batch, do the following:
+            a. Perform the backpropagation algorithm on each input and ouput using the four equations.
+            b. Update the weights and biases using the gradient descent algorithm. Specifically, w = w - (eta/len(mini_batch))*nw and b = b - (eta/len(mini_batch))*nb,
+            where nw and nb are the gradients of the cost function C_x with respect to w and b, respectively.
+        4. Evaluate the network using the test data after each epoch.
+
+
+        
+        
+        """
         if test_data: n_test = len(test_data)
         n = len(training_data)
         for j in range(epochs):
@@ -104,9 +118,10 @@ class Network(object):
             activations.append(activation)
         # backward pass
         delta = self.cost_derivative(activations[-1], y) * \
-            sigmoid_prime(zs[-1])
-        nabla_b[-1] = delta
-        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+            sigmoid_prime(zs[-1]) # Equation PB1
+        nabla_b[-1] = delta # Equation PB3
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose()) # Equation PB4
+
         # Note that the variable l in the loop below is used a little
         # differently to the notation in Chapter 2 of the book.  Here,
         # l = 1 means the last layer of neurons, l = 2 is the
@@ -116,9 +131,9 @@ class Network(object):
         for l in range(2, self.num_layers):
             z = zs[-l]
             sp = sigmoid_prime(z)
-            delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
-            nabla_b[-l] = delta
-            nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+            delta = np.dot(self.weights[-l+1].transpose(), delta) * sp # Equation PB2
+            nabla_b[-l] = delta # Equation PB3
+            nabla_w[-l] = np.dot(delta, activations[-l-1].transpose()) # Equation PB4
         return (nabla_b, nabla_w)
 
     def evaluate(self, test_data):
